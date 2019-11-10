@@ -79,11 +79,12 @@
                     data[(j*canvas.width+x)*4+1]=255;
                     data[(j*canvas.width+x)*4+2]=255;
                 }
+                const v = 255*Math.abs(x-canvas.width/2)*2/canvas.width;
                 if(x>canvas.width/2) {
                     document.getElementById('L').style.backgroundColor='black';
-                    document.getElementById('R').style.backgroundColor='white';
+                    document.getElementById('R').style.backgroundColor=`rgb(${v},${v},${v}`;
                 } else {
-                    document.getElementById('L').style.backgroundColor='white';
+                    document.getElementById('L').style.backgroundColor=`rgb(${v},${v},${v}`;
                     document.getElementById('R').style.backgroundColor='black';
                 }
             } else {
