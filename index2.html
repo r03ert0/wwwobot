@@ -81,11 +81,11 @@
                 }
                 const v = 255*Math.abs(x-canvas.width/2)*2/canvas.width;
                 if(x>canvas.width/2) {
-                    document.getElementById('L').style.backgroundColor='black';
-                    document.getElementById('R').style.backgroundColor=`rgb(${v},${v},${v}`;
-                } else {
                     document.getElementById('L').style.backgroundColor=`rgb(${v},${v},${v}`;
-                    document.getElementById('R').style.backgroundColor='black';
+                    document.getElementById('R').style.backgroundColor='white'
+                } else {
+                    document.getElementById('L').style.backgroundColor='white';
+                    document.getElementById('R').style.backgroundColor=`rgb(${v},${v},${v}`;
                 }
             } else {
                 document.getElementById('L').style.backgroundColor='black';
