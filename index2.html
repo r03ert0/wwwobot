@@ -80,11 +80,11 @@
                     data[(j*canvas.width+x)*4+2]=255;
                 }
                 if(x>canvas.width/2) {
-                    document.getElementById('L').style.backgroundColor='white';
-                    document.getElementById('R').style.backgroundColor='black';
-                } else {
                     document.getElementById('L').style.backgroundColor='black';
                     document.getElementById('R').style.backgroundColor='white';
+                } else {
+                    document.getElementById('L').style.backgroundColor='white';
+                    document.getElementById('R').style.backgroundColor='black';
                 }
             } else {
                 document.getElementById('L').style.backgroundColor='black';
