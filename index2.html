@@ -34,13 +34,13 @@
     const video = document.getElementById('video');
     const canvas = document.getElementById('image');
     const ctx = canvas.getContext('2d');
-    video.style.width = '200px';
-    video.style.height = '150px';
-    canvas.style.width = '200px';
-    canvas.style.height = '150px';
+    video.style.width = '100px';
+    canvas.style.width = '100px';
     video.onloadedmetadata = function() {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
+        video.style.height = (100*video.videoHeight/video.videoWidth) + 'px';
+        canvas.style.height = (100*video.videoHeight/video.videoWidth) + 'px';
     };
 
     /* Setting up the constraint */
@@ -80,7 +80,7 @@
                 data[(j*canvas.width+x)*4+2]=255;
             }
             ctx.putImageData(imgData, 0, 0);
-            if(x>320) {
+            if(x>canvas.width/2) {
                 document.getElementById('L').style.backgroundColor='white';
                 document.getElementById('R').style.backgroundColor='black';
             } else {
