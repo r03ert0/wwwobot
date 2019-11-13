@@ -21,7 +21,7 @@
     const pattern = [[1,0],[0,1],[0,0],[1,1],[1,1],[0,0]];
     let i = 0;
     setInterval({
-      const [l, r] = pattern[i];
+      let [l, r] = pattern[i];
       document.getElementById("L").style.backgroundColor = (l)?"white":"black";
       document.getElementById("R").style.backgroundColor = (r)?"white":"black";
       i++;
