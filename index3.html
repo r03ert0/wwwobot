@@ -1,3 +1,29 @@
 <html>
-Hello
+  <div id="L"></div>
+  <div id="R"></div>
+  <style>
+    #L {
+        position:absolute;
+        left: 0;
+        width: 50%;
+        height: 100%;
+        background: black;
+    }
+    #R {
+        position:absolute;
+        right: 0;
+        width: 50%;
+        height: 100%;
+        background: black;
+    }
+  </style>
+  <script>
+    const pattern = [[1,0],[0,1],[0,0],[1,1],[1,1],[0,0]];
+    let i = 0;
+    setInterval({
+      const [l, r] = pattern[i];
+      document.getElementById("L").style.backgroundColor = (l)?"white":"black";
+      document.getElementById("R").style.backgroundColor = (r)?"white":"black";
+    }, 500 });
+  </script>
 </html>
