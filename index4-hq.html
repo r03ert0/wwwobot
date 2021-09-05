@@ -1,0 +1,212 @@
+<!doctype html>
+<html>
+<head>
+    <title>Telepresence: HQ</title>
+    <style>
+    html,body {
+        margin:0;
+        padding:0;
+        width:100%;
+        height:100%;
+        background-color:black;
+    }
+    #motorLeft {
+        position:absolute;
+        left:0;
+        top:50%;
+        width:100px;
+        height:100px;
+        transform:translate(0, -50%);
+        display:inline-block;
+    }
+    #motorRight {
+        position:absolute;
+        right:0;
+        top:50%;
+        width:100px;
+        height:100px;
+        transform:translate(0, -50%);
+        display:inline-block;
+    }
+    #feedback {
+        position: absolute;
+        margin-left:50%;
+        height: 100%;
+        top:0;
+        transform: translate( -50%, 0);
+    }
+    </style>
+</head>
+
+<body>
+    <a id="home" href="/"><div style="
+        display:block;position:fixed;top:0;left:0;
+        font-size:2rem;
+        width:7rem;height:7rem;
+        background:white;z-index:10"
+    >Home</div></a>
+
+    <div id="motorLeft"></div>
+    <div id="motorRight"></div>
+    <div id="feedback">
+        <canvas id="image"></canvas>
+    </div>
+
+<script>
+var define = {amd: undefined};
+</script>
+<script src="https://cdn.jsdelivr.net/gh/vigata/petitoJPEG/pttjpeg.js"></script>
+<script src="base64-arraybuffer.js"></script>
+<script>
+    /*
+        Web socket
+    */
+    var port=8080;
+    var socket;
+    var key=[];
+    document.onkeyup=function(e) {
+        key[e.which]=0;
+        switch(e.which) {
+            case 37:
+                move(-1);
+                break;
+            case 39:
+                move(-2);
+                break;
+        }
+    }
+    document.onkeydown=function(e){
+        if(key[e.which]!==0)
+            return;
+        key[e.which]=1;
+        console.log(e.which);
+        switch(e.which) {
+            case 37:
+                move(1);
+                break;
+            case 39:
+                move(2);
+                break;
+        }
+    }
+
+    function receiveBinaryMessage(msg) {
+        var fileReader = new FileReader();
+        fileReader.onload =  () => {
+            var data = new Uint8Array(fileReader.result);
+            // var urlCreator = window.URL || window.webkitURL;
+            // var imageUrl = urlCreator.createObjectURL(data);
+            const url = "data:image/jpeg;base64," + encode(data);
+            const img = new Image(240,320)
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0, 240, 320);
+            }
+            img.setAttribute("src", url);
+        }
+        fileReader.readAsArrayBuffer(msg);
+    }
+
+    function receiveStringMessage(msg) {
+        return;
+        var	data=JSON.parse(msg.data);
+        switch(data.type) {
+            case "chat":
+                receiveMessage(data);
+                break;
+            case "broadcast":
+                receiveBroadcastMessage(data);
+                break;
+        }
+    }
+
+    socket=initSocketConnection("wss://192.168.1.48:8080");
+    // socket = initSocketConnection("ws://192.168.1.48:8080");
+    function initSocketConnection(host) {
+        var s;
+        try {
+            s = createSocket(host);
+            s.onopen = (msg) => {
+                console.log("[initSocketConnection] onopen", msg);
+            };
+            s.onmessage = (msg) => {
+                if (typeof msg.data === "object") {
+                    receiveBinaryMessage(msg.data);
+                } else if (typeof msg.data === "string") {
+                    receiveStringMessage(msg.data);
+                } else {
+                    console.log("Unknown message type", typeof msg.data);
+                }
+            };
+            s.onclose = (msg) => {};
+            return s;
+        }
+        catch (ex) {
+            console.log("Chat (not connected - connection error)");
+        }
+    }
+
+    function createSocket(host) {
+        var ws;
+        if (window.WebSocket) {
+            ws=new WebSocket(host);
+        } else if (window.MozWebSocket) {
+            ws=new MozWebSocket(host);
+        }
+        return ws;
+    }
+
+    function sendMessage(s,msg) {
+        try {
+            s.send(JSON.stringify(msg));
+        } catch (ex) {
+            console.log("ERROR: Unable to sendUserDataMessage",ex);
+        }
+    }
+    function receiveMessage(msg) {
+        console.log(msg);
+        document.getElementById("log").innerHTML+=msg.msg+"</br>";
+    }
+    function receiveBroadcastMessage(msg) {
+        action(parseInt(msg.msg));
+    }
+
+    function sendmsg(i) {
+        var msg={type:"echo",msg:"click "+clickCount++};
+        sendMessage(socket,msg);
+    }
+    function move(i) {
+        var msg={type:"broadcast",msg:""+i};		
+        sendMessage(socket, msg);
+    
+        action(i);
+    }
+    function action(i) {
+        switch(i) {
+            case 1:
+                document.getElementById("motorLeft").style.backgroundColor="#fff";
+                break;
+            case -1:
+                document.getElementById("motorLeft").style.backgroundColor="0";
+                break;
+            case 2:
+                document.getElementById("motorRight").style.backgroundColor="#fff";
+                break;
+            case -2:
+                document.getElementById("motorRight").style.backgroundColor="0";
+                break;
+        }
+    }
+
+    /*
+    Video
+    */
+    const canvas = document.getElementById('image');
+    const ctx = canvas.getContext('2d');
+    const [width, height] = [240, 320];
+    // canvas.style.width = `${width}px`;
+    canvas.style.height = "100%";//`${height}px`
+    canvas.width = width;
+    canvas.height = height;
+</script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html>
+<head>
+    <title>Remote control</title>
+<style>
+html,body {
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    background-color:black;
+}
+#motorLeft {
+    width:49%;
+    height:100%;
+    display:inline-block;
+}
+#motorRight {
+    width:49%;
+    height:100%;
+    display:inline-block;
+}
+a#home > div {
+    display:block;
+    font-size:2rem;
+    position:fixed;
+    top:0;
+    left:0;
+    width:7rem;
+    height:7rem;
+    background:white;
+}
+</style>
+</head>
+<body>
+    <a id="home" href="/"><div style="
+        display:block;position:fixed;top:0;left:0;
+        font-size:2rem;
+        width:7rem;height:7rem;
+        background:white;z-index:10"
+    >Home</div></a>
+
+    <div id="motorLeft">
+    </div>
+    <div id="motorRight">
+    </div>
+
+<script>
+
+    var port=8080;
+    var socket;
+    var key=[];
+
+    document.onkeyup=function(e) {
+        key[e.which]=0;
+        switch(e.which) {
+            case 37:
+                move(-1);
+                break;
+            case 39:
+                move(-2);
+                break;
+        }
+    }
+    document.onkeydown=function(e){
+        if(key[e.which]!==0)
+            return;
+        key[e.which]=1;
+        console.log(e.which);
+        switch(e.which) {
+            case 37:
+                move(1);
+                break;
+            case 39:
+                move(2);
+                break;
+        }
+    }
+
+    socket=initSocketConnection("wss://192.168.1.48:8080");
+    // socket=initSocketConnection("ws://192.168.1.48:8080");
+
+    function initSocketConnection(host) {
+        var s;
+        try {
+            s = createSocket(host);
+            s.onopen = function(msg) {
+                console.log("[initSocketConnection] onopen",msg);
+            };
+            s.onmessage = function(msg) {
+                var	data=JSON.parse(msg.data);
+                switch(data.type)
+                {
+                    case "chat":
+                        receiveMessage(data);
+                        break;
+                    case "broadcast":
+                        receiveBroadcastMessage(data);
+                        break;
+                }
+            };
+            s.onclose = function(msg) {
+            };
+            return s;
+        }
+        catch (ex) {
+            console.log("Chat (not connected - connection error)");
+        }
+    }
+    function createSocket(host) {
+        var ws;
+        if (window.WebSocket) {
+            ws=new WebSocket(host);
+        } else if (window.MozWebSocket) {
+            ws=new MozWebSocket(host);
+        }
+        return ws;
+    }
+    function sendMessage(s,msg) {
+        try {
+            s.send(JSON.stringify(msg));
+        } catch (ex) {
+            console.log("ERROR: Unable to sendUserDataMessage",ex);
+        }
+    }
+    function receiveMessage(msg) {
+        console.log(msg);
+        document.getElementById("log").innerHTML+=msg.msg+"</br>";
+    }
+    function receiveBroadcastMessage(msg) {
+        action(parseInt(msg.msg));
+    }
+
+    function sendmsg(i) {
+        var msg={type:"echo",msg:"click "+clickCount++};
+        sendMessage(socket,msg);
+    }
+    function move(i) {
+        var msg={type:"broadcast",msg:""+i};		
+        sendMessage(socket,msg);
+    
+        action(i);
+    }
+    function action(i) {
+        switch(i) {
+            case 1:
+                document.getElementById("motorLeft").style.backgroundColor="#fff";
+                break;
+            case -1:
+                document.getElementById("motorLeft").style.backgroundColor="0";
+                break;
+            case 2:
+                document.getElementById("motorRight").style.backgroundColor="#fff";
+                break;
+            case -2:
+                document.getElementById("motorRight").style.backgroundColor="0";
+                break;
+        }
+    }
+    function ping(i) {
+        var msg={type:"chat",msg:"ping "+i+"!"};
+        sendMessage(socket,msg);
+    }
+</script>
+</body>
+</html>

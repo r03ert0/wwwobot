@@ -10,6 +10,7 @@
   },
   "devDependencies": {},
   "scripts": {
+    "start": "live-server --https=./https.conf.js & node wwwobotServer.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
